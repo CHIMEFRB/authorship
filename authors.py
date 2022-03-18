@@ -10,10 +10,12 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('auth_tsv')
     parser.add_argument('affil_tsv')
+    parser.add_argument('--journal', type=str, default='apj',
+                        help='Journal format. Currenly supported are apj and nature')
     parser.add_argument('--discard', type=int, default=3,
-                        help='Number of lines to discard from the top of the authors spreadsheet, default %(default)')
+                        help='Number of lines to discard from the top of the authors spreadsheet')
     parser.add_argument('--discard-affil', type=int, default=1,
-                        help='Number of lines to discard from the top of the affiliations spreadsheet, default %(default)')
+                        help='Number of lines to discard from the top of the affiliations spreadsheet')
 
     # Here we assume the spreadsheet has columns:
     #
@@ -107,7 +109,7 @@ def main():
     authors = [authors[i] for i in I]
 
     # ApJ format
-    if True:
+    if opt.journal == 'apj':
         for auth,orcid,affil in authors:
             orctxt = ''
             if len(orcid):
@@ -117,7 +119,7 @@ def main():
                 print('  \\affiliation{%s}' % affilmap.get(aff, aff))
 
     # Nature format
-    if False:
+    elif opt.journal == 'nature':
         txt = []
         uaffils = []
         txt.append('\\author{')
@@ -147,6 +149,10 @@ def main():
         txt.append('\\end{affiliations}')
         txt.append('}')
         print('\n'.join(txt))
+        
+    # Journal not recognized
+    else:
+        raise NotImplemented("Journal name not found")
 
     acks = list(set(acks))
     acks.sort()
