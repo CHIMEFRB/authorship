@@ -17,7 +17,7 @@ def main():
 
     # Here we assume the spreadsheet has columns:
     #
-    # Lastname  |  First names  |  x  |  x  |  ORCID  |  Affiliations  |  Acks  | ...
+    # Lastname  |  First names  |  x  |  x  |  ORCID  |  Affiliations  |  Inst Acks  |  Personal Acks  |  ...
     #
     parser.add_argument('--lastname_index', type=int, default=0,
                         help='Index of author last name in spreadsheet')
@@ -28,7 +28,9 @@ def main():
     parser.add_argument('--affil_index', type=int, default=5,
                         help='Index of author affiliation acronyms in spreadsheet')
     parser.add_argument('--ack_index', type=int, default=6,
-                        help='Index of author acknowledgements in spreadsheet')
+                        help='Index of institutional acknowledgements in spreadsheet')
+    parser.add_argument('--persack_index', type=int, default=7,
+                        help='Index of personal acknowledgements in spreadsheet')
 
     opt = parser.parse_args()
 
@@ -47,6 +49,7 @@ def main():
 
     authors = []
     acks = []
+    pers_acks = []
     lastnames = []
     for line in f.readlines():
         words = line.replace('\n','').replace('  ', ' ').split('\t')
@@ -56,6 +59,7 @@ def main():
         orcid     = words[opt.orcid_index]
         affils    = words[opt.affil_index]
         ack       = words[opt.ack_index]
+        pers_ack  = words[opt.persack_index]
 
         # Split affiliations by semicolons OR commas
         # (because people can't follow instructions...)
@@ -85,8 +89,8 @@ def main():
         # Hi Moritz :)
         name = name.replace('ü', '\\"{u}')
 
-        if len(ack):
-            acks.append(ack)
+        acks.append(ack)
+        pers_acks.append(pers_ack)
         authors.append((name, orcid, affils))
 
     # Parse affiliation acronym expansion spreadsheet
@@ -131,13 +135,13 @@ def main():
                     uaffils.append(aff)
                 sups.append(i+1)
             sep = ',' if iauth < len(authors)-1 else ''
-        
+
             affiltxt = ''
             if len(sups):
                 affiltxt = '$^{%s}$' % (','.join(['%i'%i for i in sups]))
             txt.append('%s%s%s \\allowbreak' % (auth, affiltxt, sep))
-        
-        txt.append('}')    
+
+        txt.append('}')
         txt.append('\\newcommand{\\affils}{')
         txt.append('\\begin{affiliations}')
         for aff in uaffils:
@@ -148,14 +152,19 @@ def main():
         txt.append('}')
         print('\n'.join(txt))
 
-    acks = list(set(acks))
-    acks.sort()
+    acks = [acks[i] for i in I]
+    pers_acks = [pers_acks[i] for i in I]
     print('% Unique acks:')
     print(r'\newcommand{\allacks}{')
     for ack in acks:
         #debug('% ', ack)
-        print(ack.replace('&', r'\&'))
-        print('%')
+        if len(ack):
+            print(ack.replace('&', r'\&'))
+            print('%')
+    for pers_ack in pers_acks:
+        if len(pers_ack):
+            print(pers_ack.replace('&', r'\&'))
+            print('%')
     print(r'}')
 
 if __name__ == '__main__':
