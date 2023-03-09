@@ -15,7 +15,7 @@ def main():
     parser.add_argument('--discard-affil', type=int, default=1,
                         help='Number of lines to discard from the top of the affiliations spreadsheet, default %(default)')
 
-    # Here we assume the spreadsheet has columns:
+    # Here we assume the spreadsheet has columns (with the last one optional):
     #
     # Lastname  |  First names  |  x  |  x  |  ORCID  |  Affiliations  |  Inst Acks  |  Personal Acks  |  ...
     #
@@ -29,6 +29,8 @@ def main():
                         help='Index of author affiliation acronyms in spreadsheet')
     parser.add_argument('--ack_index', type=int, default=6,
                         help='Index of institutional acknowledgements in spreadsheet')
+    parser.add_argument('--persack', type=bool, default=False,
+                        help='If True, there is a separte column for personal acknowledgements on top of institutional ones.')
     parser.add_argument('--persack_index', type=int, default=7,
                         help='Index of personal acknowledgements in spreadsheet')
 
@@ -49,7 +51,8 @@ def main():
 
     authors = []
     acks = []
-    pers_acks = []
+    if persack:
+        pers_acks = []
     lastnames = []
     for line in f.readlines():
         words = line.replace('\n','').replace('  ', ' ').split('\t')
@@ -59,7 +62,8 @@ def main():
         orcid     = words[opt.orcid_index]
         affils    = words[opt.affil_index]
         ack       = words[opt.ack_index]
-        pers_ack  = words[opt.persack_index]
+        if persack:
+            pers_ack  = words[opt.persack_index]
 
         # Split affiliations by semicolons OR commas
         # (because people can't follow instructions...)
@@ -90,7 +94,8 @@ def main():
         name = name.replace('ü', '\\"{u}')
 
         acks.append(ack)
-        pers_acks.append(pers_ack)
+        if persack:
+            pers_acks.append(pers_ack)
         authors.append((name, orcid, affils))
 
     # Parse affiliation acronym expansion spreadsheet
@@ -153,7 +158,8 @@ def main():
         print('\n'.join(txt))
 
     acks = [acks[i] for i in I]
-    pers_acks = [pers_acks[i] for i in I]
+    if persack:
+        pers_acks = [pers_acks[i] for i in I]
     print('% Unique acks:')
     print(r'\newcommand{\allacks}{')
     for ack in acks:
@@ -161,10 +167,11 @@ def main():
         if len(ack):
             print(ack.replace('&', r'\&'))
             print('%')
-    for pers_ack in pers_acks:
-        if len(pers_ack):
-            print(pers_ack.replace('&', r'\&'))
-            print('%')
+    if persack:
+        for pers_ack in pers_acks:
+            if len(pers_ack):
+                print(pers_ack.replace('&', r'\&'))
+                print('%')
     print(r'}')
 
 if __name__ == '__main__':
