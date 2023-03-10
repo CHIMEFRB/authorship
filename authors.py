@@ -51,7 +51,7 @@ def main():
 
     authors = []
     acks = []
-    if persack:
+    if opt.persack:
         pers_acks = []
     lastnames = []
     for line in f.readlines():
@@ -62,7 +62,7 @@ def main():
         orcid     = words[opt.orcid_index]
         affils    = words[opt.affil_index]
         ack       = words[opt.ack_index]
-        if persack:
+        if opt.persack:
             pers_ack  = words[opt.persack_index]
 
         # Split affiliations by semicolons OR commas
@@ -94,7 +94,7 @@ def main():
         name = name.replace('ü', '\\"{u}')
 
         acks.append(ack)
-        if persack:
+        if opt.persack:
             pers_acks.append(pers_ack)
         authors.append((name, orcid, affils))
 
@@ -158,7 +158,7 @@ def main():
         print('\n'.join(txt))
 
     acks = [acks[i] for i in I]
-    if persack:
+    if opt.persack:
         pers_acks = [pers_acks[i] for i in I]
     print('% Unique acks:')
     print(r'\newcommand{\allacks}{')
@@ -167,7 +167,7 @@ def main():
         if len(ack):
             print(ack.replace('&', r'\&'))
             print('%')
-    if persack:
+    if opt.persack:
         for pers_ack in pers_acks:
             if len(pers_ack):
                 print(pers_ack.replace('&', r'\&'))
