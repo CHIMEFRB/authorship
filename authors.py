@@ -14,6 +14,9 @@ def main():
                         help='Number of lines to discard from the top of the authors spreadsheet, default %(default)')
     parser.add_argument('--discard-affil', type=int, default=1,
                         help='Number of lines to discard from the top of the affiliations spreadsheet, default %(default)')
+    parser.add_argument('--num_ordered', type=int, default=1,
+                        help='The number of authors in the list that are already ordered correctly (first author paper)')
+
 
     # Here we assume the spreadsheet has columns (with the last one optional):
     #
@@ -62,6 +65,7 @@ def main():
         orcid     = words[opt.orcid_index]
         affils    = words[opt.affil_index]
         ack       = words[opt.ack_index]
+
         if opt.persack:
             pers_ack  = words[opt.persack_index]
 
@@ -112,8 +116,12 @@ def main():
     debug('Last names:', lastnames)
 
     # Sort by last name
-    I = np.argsort(lastnames)
+    num_ordered = opt.num_ordered
+    I = np.argsort(lastnames[num_ordered:])
+    I = np.concatenate((np.arange(num_ordered), I+num_ordered))
+    debug("Unsorted authors:", lastnames, "len:", len(lastnames))
     authors = [authors[i] for i in I]
+    debug('Sorted authors:', authors,"len:", len(authors))
 
     # ApJ format
     if True:
