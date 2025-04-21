@@ -118,7 +118,7 @@ def main():
     # Sort by last name
     num_ordered = opt.num_ordered
     I = np.argsort(lastnames[num_ordered:])
-    I = np.concatenate((np.arange(num_ordered), I+num_ordered-1))
+    I = np.concatenate((np.arange(num_ordered), I+num_ordered))
     debug("Unsorted authors:", lastnames, "len:", len(lastnames))
     authors = [authors[i] for i in I]
     debug('Sorted authors:', authors,"len:", len(authors))
