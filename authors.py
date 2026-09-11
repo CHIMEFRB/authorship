@@ -20,12 +20,14 @@ def main():
 
     # Here we assume the spreadsheet has columns (with the last one optional):
     #
-    # Lastname  |  First names  |  x  |  x  |  ORCID  |  Affiliations  |  Inst Acks  |  Personal Acks  |  ...
+    # Lastname  |  First names  |  x  |  Email  |  ORCID  |  Affiliations  |  Inst Acks  |  Personal Acks  |  ...
     #
     parser.add_argument('--lastname_index', type=int, default=0,
                         help='Index of author last name in spreadsheet')
     parser.add_argument('--firstname_index', type=int, default=1,
                         help='Index of author non-last names in spreadsheet')
+    parser.add_argument('--email_index', type=int, default=3,
+                        help='Index of email addresses in spreadsheet')
     parser.add_argument('--orcid_index', type=int, default=4,
                         help='Index of author ORCID in spreadsheet')
     parser.add_argument('--affil_index', type=int, default=5,
@@ -62,6 +64,7 @@ def main():
 
         lastname  = words[opt.lastname_index ]
         firstname = words[opt.firstname_index]
+        email     = words[opt.email_index]
         orcid     = words[opt.orcid_index]
         affils    = words[opt.affil_index]
         ack       = words[opt.ack_index]
@@ -100,7 +103,7 @@ def main():
         acks.append(ack)
         if opt.persack:
             pers_acks.append(pers_ack)
-        authors.append((name, orcid, affils))
+        authors.append((name, orcid, affils, email))
 
     # Parse affiliation acronym expansion spreadsheet
     f = f2
@@ -125,20 +128,22 @@ def main():
 
     # ApJ format
     if True:
-        for auth,orcid,affil in authors:
+        for auth,orcid,affil,email in authors:
             orctxt = ''
             if len(orcid):
                 orctxt = '[%s]' % orcid
             print('\\author%s{%s}' % (orctxt, auth))
             for aff in affil:
                 print('  \\affiliation{%s}' % affilmap.get(aff, aff))
+            if len(email):
+                print('  \\email{%s}' % email)
 
     # Nature format
     if False:
         txt = []
         uaffils = []
         txt.append('\\author{')
-        for iauth,(auth,orcid,affil) in enumerate(authors):
+        for iauth,(auth,orcid,affil,email) in enumerate(authors):
             sups = []
             for aff in affil:
                 if aff in uaffils:
